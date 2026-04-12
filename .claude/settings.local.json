@@ -1,7 +1,23 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx create-next-app@latest . --typescript --app --src-dir --no-tailwind --eslint --no-import-alias --use-npm)"
+      "Bash(npx create-next-app@latest . --typescript --app --src-dir --no-tailwind --eslint --no-import-alias --use-npm)",
+      "Bash(mv /tmp/wetbrowser-icon.png c:/Users/idse_/Desktop/lawbrowser_frontend/public/)",
+      "Bash(npm install:*)",
+      "Bash(npx next:*)",
+      "Bash(curl -s -D - -o /dev/null http://100.85.247.121:8000/health)",
+      "Bash(curl -s -w \"\\\\nHTTP_CODE: %{http_code}\\\\n\" \"http://100.85.247.121:8000/api/v1/node?name=Nederland\")",
+      "Bash(curl -s -w \"\\\\nHTTP_CODE: %{http_code}\\\\n\" --max-time 10 \"http://100.85.247.121:8000/api/v1/node?name=Nederland\")",
+      "Bash(curl -s -w \"\\\\nHTTP_CODE: %{http_code}\\\\n\" --max-time 10 \"http://100.85.247.121:8000/api/v1/node?uri=test\")",
+      "Bash(curl -s -w \"\\\\nHTTP_CODE: %{http_code}\\\\n\" --max-time 10 \"http://100.85.247.121:8000/api/v1/search?q=Nederland\")",
+      "Bash(curl -s -w \"\\\\nHTTP_CODE: %{http_code}\\\\n\" --max-time 10 \"http://100.85.247.121:8000/api/v1/node\")",
+      "Bash(curl -s -w \"\\\\nHTTP_CODE: %{http_code}\\\\n\" --max-time 15 \"http://100.85.247.121:8000/api/v1/node?name=Nederlands_recht\")",
+      "Bash(curl -s -w \"\\\\nHTTP_CODE: %{http_code}\\\\n\" --max-time 15 \"http://100.85.247.121:8000/api/v1/node?uri=https://legal-ontology.org/id/Nederlands_recht\")",
+      "Bash(curl -s --max-time 15 \"http://100.85.247.121:8000/api/v1/node?uri=https://legal-ontology.org/id/Onroerend_goedrecht\")",
+      "Bash(python3 -c \"import sys,json; print\\(json.dumps\\(json.load\\(sys.stdin\\), indent=2\\)\\)\")",
+      "Bash(node -e \"process.stdin.resume\\(\\); let d=''''''''; process.stdin.on\\(''''data'''',c=>d+=c\\); process.stdin.on\\(''''end'''',\\(\\)=>console.log\\(JSON.stringify\\(JSON.parse\\(d\\),null,2\\)\\)\\)\")",
+      "Bash(curl -s --max-time 15 \"http://100.85.247.121:8000/api/v1/node?uri=https://legal-ontology.org/id/Onroerend_goedrecht_huur\")",
+      "Bash(curl -s --max-time 15 \"http://100.85.247.121:8000/api/v1/node?uri=https://legal-ontology.org/id/Goederenrecht\")"
     ]
   }
 }
