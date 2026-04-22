@@ -17,7 +17,20 @@
       "Bash(python3 -c \"import sys,json; print\\(json.dumps\\(json.load\\(sys.stdin\\), indent=2\\)\\)\")",
       "Bash(node -e \"process.stdin.resume\\(\\); let d=''''''''; process.stdin.on\\(''''data'''',c=>d+=c\\); process.stdin.on\\(''''end'''',\\(\\)=>console.log\\(JSON.stringify\\(JSON.parse\\(d\\),null,2\\)\\)\\)\")",
       "Bash(curl -s --max-time 15 \"http://100.85.247.121:8000/api/v1/node?uri=https://legal-ontology.org/id/Onroerend_goedrecht_huur\")",
-      "Bash(curl -s --max-time 15 \"http://100.85.247.121:8000/api/v1/node?uri=https://legal-ontology.org/id/Goederenrecht\")"
+      "Bash(curl -s --max-time 15 \"http://100.85.247.121:8000/api/v1/node?uri=https://legal-ontology.org/id/Goederenrecht\")",
+      "Bash(curl -s --max-time 20 \"http://100.85.247.121:8000/api/v1/node?uri=https://legal-ontology.org/id/BWBR0050295\")",
+      "Bash(curl -s --max-time 20 \"http://100.85.247.121:8000/api/v1/node?uri=https://legal-ontology.org/id/BWBR0005291\")",
+      "Bash(node -e \"process.stdin.resume\\(\\);let d='''''''';process.stdin.on\\(''''data'''',c=>d+=c\\);process.stdin.on\\(''''end'''',\\(\\)=>{const j=JSON.parse\\(d\\);const t=j.document_tree;console.log\\(''''Root keys:'''', Object.keys\\(t\\)\\);console.log\\(''''Root children count:'''', t.children?.length\\);const c0=t.children?.[0];if\\(c0\\){console.log\\(''''First child:'''', JSON.stringify\\(c0,[''''uri'''',''''type'''',''''label'''',''''titel'''',''''textContent''''],2\\).slice\\(0,300\\)\\);console.log\\(''''First child children count:'''', c0.children?.length\\);if\\(c0.children?.[0]\\){const c00=c0.children[0];console.log\\(''''Grandchild:'''', JSON.stringify\\(c00,[''''uri'''',''''type'''',''''label'''',''''titel'''',''''textContent''''],2\\).slice\\(0,300\\)\\);console.log\\(''''Grandchild children count:'''', c00.children?.length\\);if\\(c00.children?.[0]\\)console.log\\(''''Great-grandchild:'''', JSON.stringify\\(c00.children[0],[''''uri'''',''''type'''',''''label'''',''''titel'''',''''textContent''''],2\\).slice\\(0,400\\)\\)}}}\\)\")",
+      "Bash(node -e \":*)",
+      "Bash(curl -s --max-time 10 \"http://100.85.247.121:8000/api/v1/cases\")",
+      "Bash(node -e \"process.stdin.resume\\(\\);let d='''''''';process.stdin.on\\(''''data'''',c=>d+=c\\);process.stdin.on\\(''''end'''',\\(\\)=>console.log\\(JSON.stringify\\(JSON.parse\\(d\\),null,2\\).slice\\(0,2000\\)\\)\\)\")",
+      "Bash(curl -s --max-time 10 \"http://100.85.247.121:8000/api/v1/cases/GRIMM-2024-001\")",
+      "Bash(node -e \"process.stdin.resume\\(\\);let d='''''''';process.stdin.on\\(''''data'''',c=>d+=c\\);process.stdin.on\\(''''end'''',\\(\\)=>{const j=JSON.parse\\(d\\);console.log\\(''''Keys:'''', Object.keys\\(j\\)\\);console.log\\(''''Chat messages:'''', j.chat_history?.length\\);console.log\\(''''Todos:'''', j.todos?.length\\);console.log\\(''''First chat:'''', JSON.stringify\\(j.chat_history?.[0],null,2\\)?.slice\\(0,300\\)\\)}\\)\")",
+      "Bash(curl -s --max-time 10 \"http://100.85.247.121:8000/api/v1/cases/GRIMM-2024-001/proces_stukken\")",
+      "Bash(node -e \"process.stdin.resume\\(\\);let d='''''''';process.stdin.on\\(''''data'''',c=>d+=c\\);process.stdin.on\\(''''end'''',\\(\\)=>console.log\\(JSON.stringify\\(JSON.parse\\(d\\),null,2\\).slice\\(0,600\\)\\)\\)\")",
+      "Bash(curl -s --max-time 10 -X PATCH \"http://100.85.247.121:8000/api/v1/cases/GRIMM-2024-001\" -H \"Content-Type: application/json\" -d '{\"\"\"\"title\"\"\"\":\"\"\"\"test\"\"\"\"}')",
+      "Bash(node -e \"process.stdin.resume\\(\\);let d='''''''';process.stdin.on\\(''''data'''',c=>d+=c\\);process.stdin.on\\(''''end'''',\\(\\)=>console.log\\(JSON.stringify\\(JSON.parse\\(d\\),null,2\\)\\)\\)\")",
+      "Bash(curl -s \"http://100.85.247.121:8000/api/v1/cases\")"
     ]
   }
 }

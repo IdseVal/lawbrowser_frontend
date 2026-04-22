@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { fetchNode, NodeResponse, RelationGroup } from "@/lib/api";
+import DocumentTree from "@/components/DocumentTree";
 
 interface NodeViewProps {
   initialNodeId: string;
@@ -199,7 +200,19 @@ export default function NodeView({ initialNodeId, isUri, onClose }: NodeViewProp
         Back
       </button>
 
-      <h5 className="node-title mb-4">{shortenUri(data.uri)}</h5>
+      {(() => {
+        const citeertitel = data.properties["https://legal-ontology.org/schema#citeertitel"]?.[0];
+        const nodeName = shortenUri(data.uri);
+        if (citeertitel) {
+          return (
+            <div className="mb-4">
+              <h4 className="node-title">{citeertitel}</h4>
+              <span className="node-subtitle">{nodeName}</span>
+            </div>
+          );
+        }
+        return <h5 className="node-title mb-4">{nodeName}</h5>;
+      })()}
 
       {/* Properties table (without relation predicates) */}
       {displayProperties.length > 0 && (
@@ -235,8 +248,13 @@ export default function NodeView({ initialNodeId, isUri, onClose }: NodeViewProp
         </>
       )}
 
+      {/* Document Tree (for legal documents) */}
+      {data.document_tree && (
+        <DocumentTree tree={data.document_tree} onNodeClick={handleChildClick} />
+      )}
+
       {/* Children */}
-      {data.children.length > 0 && (
+      {data.children && data.children.length > 0 && (
         <>
           <div className="section-heading">
             <i className="fa-solid fa-diagram-project me-2" />
@@ -385,7 +403,7 @@ export default function NodeView({ initialNodeId, isUri, onClose }: NodeViewProp
         </div>
       )}
 
-      {data.children.length === 0 && displayProperties.length === 0 && !hasRelations && (
+      {(!data.children || data.children.length === 0) && !data.document_tree && displayProperties.length === 0 && !hasRelations && (
         <p className="no-results">
           <i className="fa-regular fa-folder-open me-2" />
           This node has no properties or children.
