@@ -113,7 +113,8 @@ export interface CasesOverviewResponse {
 
 export interface ChatMessage {
   id: string;
-  role: "user" | "assistant";
+  role: "user" | "assistant" | "system";
+  type?: string;
   content: string;
   timestamp: string;
 }
@@ -193,6 +194,69 @@ export interface CaseFactsResponse {
   case_facts: Record<string, unknown>;
 }
 
+/* ---- Intake types ---- */
+
+export interface IntakeStepResponse {
+  step: string;
+  saved: boolean;
+  checklist_progress: ChecklistProgress;
+  agents_ready: string[];
+}
+
+export interface IntakeEvidenceUpload {
+  id: string;
+  filename: string;
+  display_name: string;
+  type: string;
+  upload_date: string;
+  description: string;
+  path: string;
+}
+
+export interface IntakeEvidenceResponse {
+  step: "evidence";
+  saved: boolean;
+  uploaded: IntakeEvidenceUpload[];
+  errors: string[];
+  checklist_progress: ChecklistProgress;
+  agents_ready: string[];
+}
+
+export interface IntakeChecklistResponse {
+  checklist_progress: ChecklistProgress;
+}
+
+export interface ChecklistPhase {
+  id: string;
+  label: string;
+  filled: number;
+  total: number;
+  complete: boolean;
+  required_open: string[];
+}
+
+export interface ChecklistProgress {
+  phases: ChecklistPhase[];
+  current_phase: string;
+  all_complete: boolean;
+}
+
+export interface ChatReplyMessage {
+  id: string;
+  role: "assistant";
+  content: string;
+  timestamp: string;
+  token_usage: { input: number; output: number };
+}
+
+export interface SendChatResponse {
+  reply: ChatReplyMessage;
+  extracted_fields: Record<string, string>;
+  suggested_todos: { text: string; due_date: string | null }[];
+  checklist_progress: ChecklistProgress;
+  agents_ready: string[];
+}
+
 export function fetchCases(): Promise<CasesOverviewResponse> {
   return apiFetch<CasesOverviewResponse>("/api/v1/cases");
 }
@@ -227,6 +291,184 @@ export function fetchCaseSettings(id: string): Promise<CaseSettingsResponse> {
 
 export function fetchCaseTodos(id: string): Promise<{ case_id: string; todos: CaseTodo[] }> {
   return apiFetch<{ case_id: string; todos: CaseTodo[] }>(`/api/v1/cases/${encodeURIComponent(id)}/todos`);
+}
+
+/* ---- Intake endpoints ---- */
+
+export async function submitIntakeStory(
+  caseId: string,
+  data: { story: string; mandate_do: string; mandate_dont?: string }
+): Promise<IntakeStepResponse> {
+  const url = new URL(`/api/v1/cases/${encodeURIComponent(caseId)}/intake/story`, BASE_URL);
+  const res = await fetch(url.toString(), {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error(`API ${res.status}: ${await res.text()}`);
+  return res.json() as Promise<IntakeStepResponse>;
+}
+
+export async function submitIntakeLocation(
+  caseId: string,
+  data: {
+    coordinates?: { lat: number; lng: number };
+    country: string;
+    province?: string;
+    municipality: string;
+    postal_code?: string;
+    house_number?: string;
+  }
+): Promise<IntakeStepResponse> {
+  const url = new URL(`/api/v1/cases/${encodeURIComponent(caseId)}/intake/location`, BASE_URL);
+  const res = await fetch(url.toString(), {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error(`API ${res.status}: ${await res.text()}`);
+  return res.json() as Promise<IntakeStepResponse>;
+}
+
+export async function submitIntakeCounterparty(
+  caseId: string,
+  data: {
+    name?: string;
+    type?: string;
+    email?: string;
+    phone?: string;
+    land?: string;
+    stad?: string;
+    postcode?: string;
+    straat?: string;
+    huisnummer?: string;
+    toevoeging?: string;
+  }
+): Promise<IntakeStepResponse> {
+  const url = new URL(`/api/v1/cases/${encodeURIComponent(caseId)}/intake/counterparty`, BASE_URL);
+  const res = await fetch(url.toString(), {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error(`API ${res.status}: ${await res.text()}`);
+  return res.json() as Promise<IntakeStepResponse>;
+}
+
+export async function submitIntakeEvidence(
+  caseId: string,
+  files: File[]
+): Promise<IntakeEvidenceResponse> {
+  const url = new URL(`/api/v1/cases/${encodeURIComponent(caseId)}/intake/evidence`, BASE_URL);
+  const formData = new FormData();
+  for (const file of files) {
+    formData.append("files[]", file);
+  }
+  const res = await fetch(url.toString(), {
+    method: "POST",
+    headers: { Accept: "application/json" },
+    body: formData,
+  });
+  if (!res.ok) throw new Error(`API ${res.status}: ${await res.text()}`);
+  return res.json() as Promise<IntakeEvidenceResponse>;
+}
+
+export function fetchIntakeChecklist(caseId: string): Promise<IntakeChecklistResponse> {
+  return apiFetch<IntakeChecklistResponse>(`/api/v1/cases/${encodeURIComponent(caseId)}/checklist`);
+}
+
+/* ---- Pipeline status ---- */
+
+export interface PipelineStage {
+  agent: string;
+  status: "pending" | "running" | "done" | "error";
+  message?: string;
+}
+
+export interface PipelineStatusResponse {
+  case_id: string;
+  status: "idle" | "running" | "done" | "error";
+  stages: PipelineStage[];
+  current_agent?: string;
+  current_message?: string;
+}
+
+export async function triggerAnalyze(caseId: string): Promise<PipelineStatusResponse> {
+  const url = new URL(`/api/v1/cases/${encodeURIComponent(caseId)}/analyze`, BASE_URL);
+  const res = await fetch(url.toString(), {
+    method: "POST",
+    headers: { Accept: "application/json" },
+  });
+  if (!res.ok) throw new Error(`API ${res.status}: ${await res.text()}`);
+  return res.json() as Promise<PipelineStatusResponse>;
+}
+
+export function fetchPipelineStatus(caseId: string): Promise<PipelineStatusResponse> {
+  return apiFetch<PipelineStatusResponse>(`/api/v1/cases/${encodeURIComponent(caseId)}/pipeline_status`);
+}
+
+/* ---- Intake pre-fill GET endpoints ---- */
+
+export interface IntakeStoryData {
+  story: string;
+  mandate_do: string;
+  mandate_dont?: string;
+}
+
+export interface IntakeLocationData {
+  coordinates?: { lat: number; lng: number };
+  country: string;
+  province?: string;
+  municipality: string;
+  postal_code?: string;
+  house_number?: string;
+}
+
+export interface IntakeCounterpartyData {
+  name: string;
+  type: string;
+  email?: string;
+  phone?: string;
+  land?: string;
+  stad?: string;
+  postcode?: string;
+  straat?: string;
+  huisnummer?: string;
+  toevoeging?: string;
+}
+
+export interface IntakeEvidenceData {
+  evidence_docs: IntakeEvidenceUpload[];
+}
+
+export function fetchIntakeStory(caseId: string): Promise<IntakeStoryData> {
+  return apiFetch<IntakeStoryData>(`/api/v1/cases/${encodeURIComponent(caseId)}/intake/story`);
+}
+
+export function fetchIntakeLocation(caseId: string): Promise<IntakeLocationData> {
+  return apiFetch<IntakeLocationData>(`/api/v1/cases/${encodeURIComponent(caseId)}/intake/location`);
+}
+
+export function fetchIntakeCounterparty(caseId: string): Promise<IntakeCounterpartyData> {
+  return apiFetch<IntakeCounterpartyData>(`/api/v1/cases/${encodeURIComponent(caseId)}/intake/counterparty`);
+}
+
+export function fetchIntakeEvidence(caseId: string): Promise<IntakeEvidenceData> {
+  return apiFetch<IntakeEvidenceData>(`/api/v1/cases/${encodeURIComponent(caseId)}/intake/evidence`);
+}
+
+export async function sendChatMessage(
+  caseId: string,
+  message: string
+): Promise<SendChatResponse> {
+  const url = new URL(`/api/v1/cases/${encodeURIComponent(caseId)}/chat`, BASE_URL);
+  const res = await fetch(url.toString(), {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ message }),
+  });
+  if (!res.ok) throw new Error(`API ${res.status}: ${await res.text()}`);
+  return res.json() as Promise<SendChatResponse>;
 }
 
 export async function createCase(

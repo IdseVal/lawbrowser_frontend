@@ -34,7 +34,13 @@ export default function Header({ tripleCount, loading, error }: HeaderProps) {
           href="/lawbuddy"
           className={`header-nav-btn ${isLawBuddy ? "active" : ""}`}
         >
-          <i className="fa-solid fa-scale-balanced me-2" />
+          <Image
+            src="/robocaat-logo-transparent.png"
+            alt="LawBuddy"
+            width={44}
+            height={44}
+            className="lawbuddy-nav-icon"
+          />
           LawBuddy
         </Link>
       </div>
