@@ -141,7 +141,7 @@ export default function CaseDetailPage() {
         const hasHistory = data.chat_history.some(
           (m) => (m.role === "user" || m.role === "assistant" || m.role === "system") && m.content?.trim()
         );
-        const pipelineActive = status?.status === "running" || status?.status === "done";
+        const pipelineActive = status?.status === "running" || status?.status === "completed";
         const checklistDone = checklist?.checklist_progress?.all_complete === true;
         const hasResults = !!summaryRes?.summary_report || (timelineRes?.timeline?.tijdlijn?.length ?? 0) > 0;
 
@@ -168,26 +168,16 @@ export default function CaseDetailPage() {
   /** Called when intake form completes — triggers analysis and starts polling */
   async function handleIntakeComplete() {
     setIntakeComplete(true);
-    // Show immediate "analyzing" state before the backend responds
+    // Show immediate placeholder while backend spins up
     setPipelineStatus({
-      case_id: caseId,
+      current_stage: "timeline",
       status: "running",
-      stages: [
-        { agent: "Tijdlijn", status: "running", message: "Tijdlijn van de zaak aan het opstellen..." },
-        { agent: "Juridisch Raamwerk", status: "pending" },
-        { agent: "Samenvatting", status: "pending" },
-      ],
+      detail: "Tijdlijn van de zaak aan het opstellen...",
+      updated_at: new Date().toISOString(),
     });
-    try {
-      const status = await triggerAnalyze(caseId);
-      setPipelineStatus(status);
-      if (status.status === "running") {
-        startPipelinePolling();
-      }
-    } catch {
-      // Analysis trigger failed — user can still chat, clear the placeholder
-      setPipelineStatus(null);
-    }
+    // Fire-and-forget: kick off analysis, then poll for real status
+    triggerAnalyze(caseId).catch(() => {});
+    startPipelinePolling();
   }
 
   const loadTabData = useCallback(
@@ -1162,6 +1152,13 @@ function IntakeForm({
 
 /* ---- Chat Panel ---- */
 
+/** Map pipeline current_stage values to readable labels */
+const STAGE_LABELS: Record<string, string> = {
+  timeline: "Tijdlijn",
+  summary: "Samenvatting",
+  legal_framework: "Juridisch Raamwerk",
+};
+
 /** Map system message types to sidebar tab keys and icons */
 const SYSTEM_MSG_MAP: Record<string, { tab: TabKey; icon: string; label: string }> = {
   timeline_ready: { tab: "tijdlijn", icon: "fa-timeline", label: "Tijdlijn" },
@@ -1317,7 +1314,6 @@ function ChatPanel({
 
   const isEmpty = messages.length === 0 && !sending;
   const pipelineRunning = pipelineStatus?.status === "running";
-  const activeStages = pipelineStatus?.stages?.filter((s) => s.status === "running") ?? [];
 
   return (
     <div className="chat-container">
@@ -1438,9 +1434,9 @@ function ChatPanel({
             </div>
           )}
 
-          {/* Active pipeline stages shown inline as cards */}
-          {pipelineRunning && activeStages.map((stage) => (
-            <div key={stage.agent} className="chat-row chat-row-system">
+          {/* Active pipeline stage shown inline as a card */}
+          {pipelineRunning && pipelineStatus && (
+            <div className="chat-row chat-row-system">
               <div className="chat-pipeline-card">
                 <Image
                   src="/robocaat-logo-transparent.png"
@@ -1450,15 +1446,17 @@ function ChatPanel({
                   className="chat-pipeline-card-logo"
                 />
                 <div className="chat-pipeline-card-body">
-                  <span className="chat-pipeline-card-agent">{stage.agent}</span>
+                  <span className="chat-pipeline-card-agent">
+                    {STAGE_LABELS[pipelineStatus.current_stage] ?? pipelineStatus.current_stage}
+                  </span>
                   <span className="chat-pipeline-card-message">
-                    {stage.message ?? "Bezig met analyseren..."}
+                    {pipelineStatus.detail ?? "Bezig met analyseren..."}
                   </span>
                 </div>
                 <div className="chat-pipeline-card-spinner" />
               </div>
             </div>
-          ))}
+          )}
 
           <div ref={messagesEndRef} />
         </div>

@@ -379,28 +379,20 @@ export function fetchIntakeChecklist(caseId: string): Promise<IntakeChecklistRes
 
 /* ---- Pipeline status ---- */
 
-export interface PipelineStage {
-  agent: string;
-  status: "pending" | "running" | "done" | "error";
-  message?: string;
-}
-
 export interface PipelineStatusResponse {
-  case_id: string;
-  status: "idle" | "running" | "done" | "error";
-  stages: PipelineStage[];
-  current_agent?: string;
-  current_message?: string;
+  current_stage: "timeline" | "summary" | "legal_framework" | "done" | "error";
+  status: "running" | "completed" | "error" | "idle";
+  detail: string;
+  updated_at: string;
 }
 
-export async function triggerAnalyze(caseId: string): Promise<PipelineStatusResponse> {
+export async function triggerAnalyze(caseId: string): Promise<void> {
   const url = new URL(`/api/v1/cases/${encodeURIComponent(caseId)}/analyze`, BASE_URL);
   const res = await fetch(url.toString(), {
     method: "POST",
     headers: { Accept: "application/json" },
   });
   if (!res.ok) throw new Error(`API ${res.status}: ${await res.text()}`);
-  return res.json() as Promise<PipelineStatusResponse>;
 }
 
 export function fetchPipelineStatus(caseId: string): Promise<PipelineStatusResponse> {
