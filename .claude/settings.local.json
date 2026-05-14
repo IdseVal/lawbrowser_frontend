@@ -30,7 +30,23 @@
       "Bash(node -e \"process.stdin.resume\\(\\);let d='''''''';process.stdin.on\\(''''data'''',c=>d+=c\\);process.stdin.on\\(''''end'''',\\(\\)=>console.log\\(JSON.stringify\\(JSON.parse\\(d\\),null,2\\).slice\\(0,600\\)\\)\\)\")",
       "Bash(curl -s --max-time 10 -X PATCH \"http://100.85.247.121:8000/api/v1/cases/GRIMM-2024-001\" -H \"Content-Type: application/json\" -d '{\"\"\"\"title\"\"\"\":\"\"\"\"test\"\"\"\"}')",
       "Bash(node -e \"process.stdin.resume\\(\\);let d='''''''';process.stdin.on\\(''''data'''',c=>d+=c\\);process.stdin.on\\(''''end'''',\\(\\)=>console.log\\(JSON.stringify\\(JSON.parse\\(d\\),null,2\\)\\)\\)\")",
-      "Bash(curl -s \"http://100.85.247.121:8000/api/v1/cases\")"
+      "Bash(curl -s \"http://100.85.247.121:8000/api/v1/cases\")",
+      "Bash(xargs grep:*)",
+      "Bash(ls -la /c/Users/idse_/Desktop/lawbrowser_frontend/src/app/lawbuddy/case/[id]/_components/)",
+      "Bash(npx tsc:*)",
+      "Bash(curl -s \"https://legal-ontology.org/api/v1/node?uri=https://legal-ontology.org/id/BWBR0005288/Boek5/Titeldeel1/Artikel1\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(''''annotations:'''', json.dumps\\(d.get\\(''''annotations'''',[]\\), indent=2, ensure_ascii=False\\)[:3000]\\)\")",
+      "Bash(node -e \"const d=JSON.parse\\(require\\(''''fs''''\\).readFileSync\\(0,''''utf8''''\\)\\); console.log\\(''''annotations:'''', JSON.stringify\\(d.annotations||[], null, 2\\).slice\\(0,3000\\)\\); console.log\\(''''linked_cases count:'''', \\(d.linked_cases||[]\\).length\\)\")",
+      "Bash(curl -s \"https://legal-ontology.org/api/v1/node?uri=https://legal-ontology.org/id/BWBR0005288/Boek5/Titeldeel1/Artikel1\" -o /tmp/artikel1.json)",
+      "Bash(node -e \"const d=JSON.parse\\(require\\(''fs''\\).readFileSync\\(''/tmp/artikel1.json'',''utf8''\\)\\); console.log\\(''annotations:'', JSON.stringify\\(d.annotations||[], null, 2\\).slice\\(0,3000\\)\\); console.log\\(''linked_cases count:'', \\(d.linked_cases||[]\\).length\\)\")",
+      "Bash(curl -v \"https://legal-ontology.org/api/v1/node?uri=https://legal-ontology.org/id/BWBR0005288/Boek5/Titeldeel1/Artikel1\")",
+      "Bash(curl -s \"http://localhost:8000/api/v1/node?uri=https://legal-ontology.org/id/BWBR0005288/Boek5/Titeldeel1/Artikel1\" -H \"Accept: application/json\" -o /tmp/artikel_notree.json)",
+      "Bash(echo \"Status: $?\")",
+      "Bash(node -e \"const d=JSON.parse\\(require\\(''fs''\\).readFileSync\\(''/tmp/artikel_notree.json'',''utf8''\\)\\); console.log\\(''Keys:'', Object.keys\\(d\\)\\); console.log\\(''has document_tree:'', !!d.document_tree\\); console.log\\(''annotations:'', JSON.stringify\\(d.annotations, null, 2\\)\\); console.log\\(''linked_cases count:'', \\(d.linked_cases||[]\\).length\\); console.log\\(''children count:'', \\(d.children||[]\\).length\\); console.log\\(''children types:'', \\(d.children||[]\\).map\\(c=>c.type\\)\\)\")",
+      "Bash(node -e \"const d=JSON.parse\\(require\\(''fs''\\).readFileSync\\(''/tmp/artikel_notree.json'',''utf8''\\)\\); console.log\\(''=== FETCH 1 \\(no tree\\) ===''\\); console.log\\(''Keys:'', Object.keys\\(d\\)\\); console.log\\(''has document_tree:'', !!d.document_tree\\); console.log\\(''annotations field exists:'', ''annotations'' in d\\); console.log\\(''annotations value:'', JSON.stringify\\(d.annotations\\)\\); console.log\\(''linked_cases field exists:'', ''linked_cases'' in d\\); console.log\\(''linked_cases count:'', \\(d.linked_cases||[]\\).length\\); console.log\\(''children count:'', \\(d.children||[]\\).length\\); console.log\\(''textContent:'', d.textContent\\)\")",
+      "Bash(node -e \"const d=JSON.parse\\(require\\(''fs''\\).readFileSync\\(process.env.TEMP+''/artikel_notree.json'',''utf8''\\)\\); console.log\\(''=== FETCH 1 \\(no tree\\) ===''\\); console.log\\(''Top-level keys:'', Object.keys\\(d\\)\\); console.log\\(''has document_tree:'', !!d.document_tree\\); console.log\\(''annotations field exists:'', ''annotations'' in d\\); console.log\\(''annotations value:'', JSON.stringify\\(d.annotations\\)\\); console.log\\(''linked_cases field exists:'', ''linked_cases'' in d\\); console.log\\(''linked_cases value:'', JSON.stringify\\(d.linked_cases\\)\\); console.log\\(''children count:'', \\(d.children||[]\\).length\\); console.log\\(''textContent:'', d.textContent\\)\")",
+      "Bash(node inspect_tree.mjs)",
+      "Bash(node inspect2.mjs)"
     ]
   }
 }

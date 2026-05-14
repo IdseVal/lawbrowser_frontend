@@ -7,6 +7,8 @@ import { naturalCompare } from "@/lib/naturalSort";
 interface DocumentTreeProps {
   tree: DocumentTreeNode;
   onNodeClick: (uri: string) => void;
+  /** When true, omit the "Documentstructuur" heading */
+  headless?: boolean;
 }
 
 /** Sort children by their label using natural Dutch legal ordering */
@@ -43,36 +45,21 @@ function TreeNode({ node, depth, onNodeClick }: TreeNodeProps) {
   const isLid = node.type === "lid";
   const heading = [node.label, node.titel].filter(Boolean).join(" — ");
 
-  // Lid with text: render label and content inline in one clickable row
-  if (isLid && hasText) {
-    return (
-      <div className={`doc-node ${depthClass(depth)} ${nodeTypeClass(node.type)}`}>
-        <div
-          className="doc-lid-inline"
-          onClick={() => onNodeClick(node.uri)}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => { if (e.key === "Enter") onNodeClick(node.uri); }}
-        >
-          {heading && <span className="doc-lid-label">{heading}</span>}
-          <span className="doc-lid-text">{node.textContent}</span>
-        </div>
-      </div>
-    );
-  }
-
-  // Lid without text: still fully clickable
+  // Lid: label is clickable, text is not
   if (isLid) {
     return (
       <div className={`doc-node ${depthClass(depth)} ${nodeTypeClass(node.type)}`}>
-        <div
-          className="doc-lid-inline"
-          onClick={() => onNodeClick(node.uri)}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => { if (e.key === "Enter") onNodeClick(node.uri); }}
-        >
-          <span className="doc-lid-label">{heading || node.uri}</span>
+        <div className="doc-lid-inline">
+          <span
+            className="doc-lid-label doc-lid-label-clickable"
+            onClick={() => onNodeClick(node.uri)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === "Enter") onNodeClick(node.uri); }}
+          >
+            {heading || node.uri}
+          </span>
+          {hasText && <span className="doc-lid-text">{node.textContent}</span>}
         </div>
       </div>
     );
@@ -112,15 +99,17 @@ function TreeNode({ node, depth, onNodeClick }: TreeNodeProps) {
   );
 }
 
-export default function DocumentTree({ tree, onNodeClick }: DocumentTreeProps) {
+export default function DocumentTree({ tree, onNodeClick, headless }: DocumentTreeProps) {
   const sortedRoot = useMemo(() => sortChildren(tree.children), [tree.children]);
 
   return (
     <div className="document-tree">
-      <div className="section-heading">
-        <i className="fa-solid fa-book-open me-2" />
-        Documentstructuur
-      </div>
+      {!headless && (
+        <div className="section-heading">
+          <i className="fa-solid fa-book-open me-2" />
+          Documentstructuur
+        </div>
+      )}
       <div className="doc-tree-container">
         {sortedRoot.map((child) => (
           <TreeNode

@@ -17,6 +17,7 @@ export default function Home() {
   const [healthLoading, setHealthLoading] = useState(true);
   const [healthError, setHealthError] = useState<string | null>(null);
   const [activeNode, setActiveNode] = useState<ActiveNode | null>(null);
+  const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
     fetchHealth()
@@ -51,6 +52,19 @@ export default function Home() {
       />
 
       <main className="container py-4">
+        <div className="edit-mode-toggle">
+          <label className="edit-mode-label">
+            <input
+              type="checkbox"
+              className="edit-mode-checkbox"
+              checked={editMode}
+              onChange={(e) => setEditMode(e.target.checked)}
+            />
+            <span className="edit-mode-switch" />
+            Bewerken
+          </label>
+        </div>
+
         <SearchBar onSelectResult={handleSearchSelect} />
 
         {activeNode ? (
@@ -59,6 +73,7 @@ export default function Home() {
             initialNodeId={activeNode.id}
             isUri={activeNode.isUri}
             onClose={handleCloseNode}
+            editMode={editMode}
           />
         ) : (
           <EuropeMap onSelectCountry={handleCountryClick} />

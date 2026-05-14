@@ -45,14 +45,58 @@ export interface DocumentTreeNode {
   children: DocumentTreeNode[];
 }
 
+export interface LinkedCase {
+  uri: string;
+  ecli: string;
+  court: string;
+  date: string;
+  subject: string;
+}
+
+export interface AnnotationSource {
+  uri: string;
+  label: string;
+}
+
+export interface Annotation {
+  uri: string;
+  type: "Voorwaarde" | "Rechtsgevolg";
+  relation: string;
+  parent_uri: string;
+  naam: string;
+  tekst_selectie?: string;
+  beschrijving?: string;
+  rechtsbronnen: AnnotationSource[];
+  rechtsliteratuur: AnnotationSource[];
+  creator: string;
+  created_at: string;
+}
+
+export interface CreateAnnotationRequest {
+  parent_uri: string;
+  type: "Voorwaarde" | "Rechtsgevolg";
+  naam: string;
+  creator: string;
+  tekst_selectie?: string;
+  beschrijving?: string;
+  rechtsbronnen?: string[];
+  rechtsliteratuur?: string[];
+}
+
 export interface NodeResponse {
   uri: string;
   properties: Record<string, string[]>;
   /** Grouped relations keyed by e.g. "active_wet", "inactive_beleidsregel" */
   relations?: Record<string, RelationGroup>;
   children: NodeChild[];
-  /** Present only for document root nodes (wet, AMvB, etc.) */
+  /** Present for document root nodes or when fetched with tree=true */
   document_tree?: DocumentTreeNode;
+  /** Text content for leaf nodes like lid/tekst */
+  textContent?: string | null;
+  /** Case law linked to this node (articles/leden) */
+  linked_cases?: LinkedCase[];
+  /** Voorwaarde / Rechtsgevolg annotations (artikel/lid nodes only) */
+  annotations?: Annotation[];
 }
 
 export interface SearchResult {
@@ -73,15 +117,91 @@ export function fetchHealth(): Promise<HealthResponse> {
   return apiFetch<HealthResponse>("/health");
 }
 
-export function fetchNode(params: { uri?: string; name?: string }): Promise<NodeResponse> {
+export function fetchNode(params: { uri?: string; name?: string; tree?: boolean }): Promise<NodeResponse> {
   const query: Record<string, string> = {};
   if (params.uri) query.uri = params.uri;
   if (params.name) query.name = params.name;
+  if (params.tree) query.tree = "true";
   return apiFetch<NodeResponse>("/api/v1/node", query);
+}
+
+/** Placeholder: fetch full case content by URI. Endpoint TBD. */
+export function fetchCaseContent(uri: string): Promise<NodeResponse> {
+  return apiFetch<NodeResponse>("/api/v1/node", { uri });
+}
+
+export async function createAnnotation(data: CreateAnnotationRequest): Promise<Annotation> {
+  const url = new URL("/api/v1/node/annotation", BASE_URL);
+  const res = await fetch(url.toString(), {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error(`API ${res.status}: ${await res.text()}`);
+  return res.json() as Promise<Annotation>;
+}
+
+export async function setNodeBeschrijving(nodeUri: string, beschrijving: string): Promise<void> {
+  const url = new URL("/api/v1/node/beschrijving", BASE_URL);
+  url.searchParams.set("uri", nodeUri);
+  const res = await fetch(url.toString(), {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ beschrijving }),
+  });
+  if (!res.ok) throw new Error(`API ${res.status}: ${await res.text()}`);
+}
+
+export interface UpdateAnnotationRequest {
+  naam?: string;
+  tekst_selectie?: string;
+  beschrijving?: string;
+  rechtsbronnen?: string[];
+  rechtsliteratuur?: string[];
+}
+
+export async function updateAnnotation(annotationUri: string, data: UpdateAnnotationRequest): Promise<Annotation> {
+  const url = new URL("/api/v1/node/annotation", BASE_URL);
+  url.searchParams.set("uri", annotationUri);
+  const res = await fetch(url.toString(), {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error(`API ${res.status}: ${await res.text()}`);
+  return res.json() as Promise<Annotation>;
+}
+
+export async function deleteAnnotation(annotationUri: string): Promise<void> {
+  const url = new URL("/api/v1/node/annotation", BASE_URL);
+  url.searchParams.set("uri", annotationUri);
+  const res = await fetch(url.toString(), {
+    method: "DELETE",
+    headers: { Accept: "application/json" },
+  });
+  if (!res.ok) throw new Error(`API ${res.status}: ${await res.text()}`);
 }
 
 export function searchNodes(q: string, limit = 10): Promise<SearchResponse> {
   return apiFetch<SearchResponse>("/api/v1/search", { q, limit: String(limit) });
+}
+
+export interface EcliSearchResult {
+  uri: string;
+  ecli: string;
+  court: string;
+  date: string;
+  subject: string;
+  score: number;
+}
+
+export interface EcliSearchResponse {
+  query: string;
+  results: EcliSearchResult[];
+}
+
+export function searchEcli(q: string, limit = 5): Promise<EcliSearchResponse> {
+  return apiFetch<EcliSearchResponse>("/api/v1/search/ecli", { q, limit: String(limit) });
 }
 
 /* ---- LawBuddy / Cases API ---- */
